@@ -10,11 +10,14 @@ func main() {
 	// deterministically.
 
 	var data int
+	done := make(chan struct{})
 
 	go func() {
 		data++
+		done <- struct{}{}
 	}()
 
+	<-done
 	fmt.Printf("the value of data is %v\n", data)
 
 	fmt.Println("Done..")

@@ -8,36 +8,48 @@ import (
 	"sync"
 )
 
-func generator(nums ...int) <-chan int {
+func generator(done <-chan interface{}, nums ...int) <-chan int {
 	out := make(chan int)
 
 	go func() {
 		for _, n := range nums {
-			out <- n
+			select {
+			case <-done:
+				return
+			case out <- n:
+			}
 		}
 		close(out)
 	}()
 	return out
 }
 
-func square(in <-chan int) <-chan int {
+func square(done <-chan interface{}, in <-chan int) <-chan int {
 	out := make(chan int)
 	go func() {
 		for n := range in {
-			out <- n * n
+			select {
+			case <-done:
+				return
+			case out <- n * n:
+			}
 		}
 		close(out)
 	}()
 	return out
 }
 
-func merge(cs ...<-chan int) <-chan int {
+func merge(done <-chan interface{}, cs ...<-chan int) <-chan int {
 	out := make(chan int)
 	var wg sync.WaitGroup
 
 	output := func(c <-chan int) {
 		for n := range c {
-			out <- n
+			select {
+			case <-done:
+				return
+			case out <- n:
+			}
 		}
 		wg.Done()
 	}
@@ -55,12 +67,16 @@ func merge(cs ...<-chan int) <-chan int {
 }
 
 func main() {
-	in := generator(2, 3)
 
-	c1 := square(in)
-	c2 := square(in)
+	done := make(chan interface{})
+	defer close(done)
 
-	out := merge(c1, c2)
+	in := generator(done, 2, 3, 55, 12, 58)
+
+	c1 := square(done, in)
+	c2 := square(done, in)
+
+	out := merge(done, c1, c2)
 
 	// TODO: cancel goroutines after receiving one value.
 
