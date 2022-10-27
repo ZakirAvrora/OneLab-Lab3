@@ -12,11 +12,17 @@ import (
 func main() {
 	start := time.Now()
 	var t *time.Timer
+	reset := make(chan struct{})
+
 	t = time.AfterFunc(randomDuration(), func() {
 		fmt.Println(time.Now().Sub(start))
-		t.Reset(randomDuration())
+		reset <- struct{}{}
 	})
-	time.Sleep(5 * time.Second)
+
+	for time.Since(start) < 5*time.Second {
+		<-reset
+		t.Reset(randomDuration())
+	}
 }
 
 func randomDuration() time.Duration {

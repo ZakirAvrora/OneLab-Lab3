@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"go-concurrency-exercises/01-exercise/01-goroutines/04-add/counting"
+	"ZakirAvrora/lab/01-exercise/01-goroutines/04-add/counting"
 )
 
 func main() {
