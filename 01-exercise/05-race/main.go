@@ -15,7 +15,7 @@ func main() {
 	reset := make(chan struct{})
 
 	t = time.AfterFunc(randomDuration(), func() {
-		fmt.Println(time.Now().Sub(start))
+		fmt.Println(time.Since(start))
 		reset <- struct{}{}
 	})
 
